@@ -15,3 +15,8 @@
 
 // for PATH_MAX
 #include <limits.h>
+
+// for opendir
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>

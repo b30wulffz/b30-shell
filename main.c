@@ -3,6 +3,7 @@
 #include "pwd.h"
 #include "cd.h"
 #include "echo.h"
+#include "ls.h"
 
 int main()
 {
@@ -97,6 +98,12 @@ int main()
             substring = strtok_r(NULL, "\n", &substringSave);
             echo(substring);
         }
+        else if (strcmp(substring, "ls") == 0)
+        {
+            substring = strtok_r(NULL, "\n", &substringSave);
+            ls(substring);
+        }
+
         free(trimmedBuffer);
         // while (token != NULL)
         // {

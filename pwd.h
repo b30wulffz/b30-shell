@@ -1,5 +1,5 @@
-#ifndef __pwd_h
-#define __pwd_h
+#ifndef __PWD_H
+#define __PWD_H
 
 char *pwd();
 

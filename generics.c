@@ -64,6 +64,8 @@ char *trim(char *src)
             }
             i++;
         }
+        // dest[ind] = '\n';
+        // ind++;
         dest[ind] = '\0';
     }
     return dest;
