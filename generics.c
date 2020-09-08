@@ -23,12 +23,12 @@ char *trim(char *src)
     {
         int i = 0, j = strlen(src) - 2;
         // from beginning
-        while (src[i] == ' ')
+        while (src[i] == ' ' || src[i] == '\t')
         {
             i++;
         }
         //from end
-        while (src[j] == ' ')
+        while (src[j] == ' ' || src[j] == '\t')
         {
             j--;
         }
@@ -47,7 +47,7 @@ char *trim(char *src)
                     flagCodes = 0;
                 }
             }
-            if (src[i] == ' ' && flagCodes == 0)
+            if ((src[i] == ' ' || src[i] == '\t') && flagCodes == 0)
             {
                 flag = 1;
             }
@@ -69,4 +69,120 @@ char *trim(char *src)
         dest[ind] = '\0';
     }
     return dest;
+}
+
+char *concat(char *str1, char *str2)
+{
+    char *result = (char *)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
+    char ind = 0;
+    for (int i = 0; i < strlen(str1); i++)
+    {
+        result[ind] = str1[i];
+        ind++;
+    }
+    for (int i = 0; i < strlen(str2); i++)
+    {
+        result[ind] = str2[i];
+        ind++;
+    }
+    result[ind] = '\0';
+    return result;
+}
+
+char *substr(char *str, int start, int end)
+{
+    if (start < 0)
+    {
+        start = 0;
+    }
+    if (end > strlen(str))
+    {
+        end = strlen(str);
+    }
+    if (start <= end)
+    {
+        char *result = (char *)malloc(sizeof(char) * (end - start + 1));
+        int ind = 0;
+        for (int i = start; i < end; i++)
+        {
+            result[ind] = str[i];
+            ind++;
+        }
+        result[ind] = '\0';
+        return result;
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+char *getBaseName(char src[], char *dest)
+{
+    int len = strlen(src);
+    if (src[len - 1] == '/')
+    {
+        len--;
+    }
+    int ind = len - 1;
+    while (ind >= 0)
+    {
+        if (src[ind] == '/')
+        {
+            break;
+        }
+        ind--;
+    }
+    ind++;
+    int size = len - ind;
+    if (size > 0)
+    {
+        dest = (char *)malloc(sizeof(char) * size);
+        int i = 0;
+        while (ind < len)
+        {
+            dest[i] = src[ind];
+            ind++;
+            i++;
+        }
+    }
+    else
+    {
+        dest = (char *)malloc(sizeof(char) * 1);
+        dest[0] = '/';
+    }
+    return dest;
+}
+
+char *rootPathResolve(char *originalPath, char *homeDir)
+{
+    char *resolvedPath;
+    int flag = 0;
+    if (strlen(originalPath) >= strlen(homeDir))
+    {
+        for (int i = 0; i < strlen(homeDir); i++)
+        {
+            if (homeDir[i] != originalPath[i])
+            {
+                flag = 1;
+                break;
+            }
+        }
+        if (flag == 0)
+        {
+            resolvedPath = (char *)malloc(sizeof(char) * (strlen(originalPath) - strlen(homeDir) + 2));
+            int i;
+            resolvedPath[0] = '~';
+            for (i = 1; i < strlen(originalPath) - strlen(homeDir) + 1; i++)
+            {
+                resolvedPath[i] = originalPath[strlen(homeDir) + i - 1];
+            }
+            resolvedPath[i] = '\0';
+        }
+    }
+    else
+    {
+        resolvedPath = originalPath;
+    }
+    return resolvedPath;
 }

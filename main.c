@@ -4,6 +4,7 @@
 #include "cd.h"
 #include "echo.h"
 #include "ls.h"
+#include "pinfo.h"
 
 int main()
 {
@@ -33,7 +34,9 @@ int main()
     char *homeDir, *currDir;
     homeDir = currDir = pwd();
 
-    char *path = "~";
+    char *path = (char *)malloc(sizeof(char) * 2);
+    path[0] = '~';
+    path[1] = '\0';
     while (run)
     {
         // printf("<%s@%s:%s> ", pw->pw_name, uBuf->nodename, path);
@@ -47,64 +50,89 @@ int main()
 
         printf("--->%s<---\n", trimmedBuffer);
 
-        char *substring, *substringSave;
-        substring = strtok_r(trimmedBuffer, " ", &substringSave);
-
-        char *command, *commandSave;
-        command = strtok_r(trimmedBuffer, "\n", &commandSave);
-
-        if (strcmp(substring, "cd") == 0)
+        if (trimmedBuffer != NULL)
         {
-            substring = strtok_r(NULL, "\n", &substringSave);
-
-            cd(substring, homeDir);
-            currDir = pwd();
-
-            int flag = 0;
-            if (strlen(currDir) >= strlen(homeDir))
+            char *substring, *substringSave;
+            substring = strtok_r(trimmedBuffer, " ", &substringSave);
+            if (substring != NULL)
             {
-                for (int i = 0; i < strlen(homeDir); i++)
+                // char *command, *commandSave;
+                // command = strtok_r(trimmedBuffer, "\n", &commandSave);
+
+                if (strcmp(substring, "cd") == 0)
                 {
-                    if (homeDir[i] != currDir[i])
-                    {
-                        flag = 1;
-                        break;
-                    }
+                    substring = strtok_r(NULL, "\n", &substringSave);
+
+                    cd(substring, homeDir);
+                    // currDir = pwd();
+
+                    // int flag = 0;
+                    // if (strlen(currDir) >= strlen(homeDir))
+                    // {
+                    //     for (int i = 0; i < strlen(homeDir); i++)
+                    //     {
+                    //         if (homeDir[i] != currDir[i])
+                    //         {
+                    //             flag = 1;
+                    //             break;
+                    //         }
+                    //     }
+                    //     if (flag == 0)
+                    //     {
+                    //         path = (char *)malloc(sizeof(char) * (strlen(currDir) - strlen(homeDir) + 2));
+                    //         int i;
+                    //         path[0] = '~';
+                    //         for (i = 1; i < strlen(currDir) - strlen(homeDir) + 1; i++)
+                    //         {
+                    //             path[i] = currDir[strlen(homeDir) + i - 1];
+                    //         }
+                    //         path[i] = '\0';
+                    //     }
+                    // }
+                    // else
+                    // {
+                    //     path = currDir;
+                    // }
+                    free(path);
+                    path = rootPathResolve(pwd(), homeDir);
                 }
-                if (flag == 0)
+                else if (strcmp(substring, "pwd") == 0)
                 {
-                    path = (char *)malloc(sizeof(char) * (strlen(currDir) - strlen(homeDir) + 2));
-                    int i;
-                    path[0] = '~';
-                    for (i = 1; i < strlen(currDir) - strlen(homeDir) + 1; i++)
-                    {
-                        path[i] = currDir[strlen(homeDir) + i - 1];
-                    }
-                    path[i] = '\0';
+                    char *presentDir = pwd();
+                    printf("%s\n", presentDir);
+                }
+                else if (strcmp(substring, "echo") == 0)
+                {
+                    substring = strtok_r(NULL, "\n", &substringSave);
+                    echo(substring);
+                }
+                else if (strcmp(substring, "ls") == 0)
+                {
+                    substring = strtok_r(NULL, "\n", &substringSave);
+                    ls(substring, homeDir, "ls");
+                }
+                else if (strcmp(substring, "la") == 0)
+                {
+                    substring = strtok_r(NULL, "\n", &substringSave);
+                    ls(substring, homeDir, "la");
+                }
+                else if (strcmp(substring, "ll") == 0)
+                {
+                    substring = strtok_r(NULL, "\n", &substringSave);
+                    ls(substring, homeDir, "ll");
+                }
+                else if (strcmp(substring, "pinfo") == 0)
+                {
+                    substring = strtok_r(NULL, "\n", &substringSave);
+                    pinfo(substring, homeDir);
+                }
+                else if (strcmp(substring, "exit") == 0)
+                {
+                    run = 0;
                 }
             }
-            else
-            {
-                path = currDir;
-            }
+            free(trimmedBuffer);
         }
-        else if (strcmp(substring, "pwd") == 0)
-        {
-            char *presentDir = pwd();
-            printf("%s\n", presentDir);
-        }
-        else if (strcmp(substring, "echo") == 0)
-        {
-            substring = strtok_r(NULL, "\n", &substringSave);
-            echo(substring);
-        }
-        else if (strcmp(substring, "ls") == 0)
-        {
-            substring = strtok_r(NULL, "\n", &substringSave);
-            ls(substring);
-        }
-
-        free(trimmedBuffer);
         // while (token != NULL)
         // {
         //     printf("%s\n", token);
