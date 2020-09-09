@@ -21,7 +21,7 @@ char *getProcessStatus(int pid)
                 if (strcmp(val, "State") == 0)
                 {
                     val = strtok(NULL, ":");
-                    status = trim(val);
+                    status = trim(val, 1);
                     break;
                 }
             }
@@ -63,6 +63,41 @@ int getMemory(int pid)
     return memory;
 }
 
+char *getVirtualMemory(int pid)
+{
+    char *status = NULL;
+    char *buff = (char *)malloc(sizeof(char) * 100);
+    sprintf(buff, "/proc/%d/status", pid);
+    if (buff != NULL)
+    {
+        FILE *fp = fopen(buff, "r");
+        if (fp != NULL)
+        {
+            char *line = (char *)malloc(sizeof(char) * 250);
+
+            while (1)
+            {
+                if (fgets(line, 250, fp) == NULL)
+                    break;
+                char *val = strtok(line, ":");
+                if (strcmp(val, "VmSize") == 0)
+                {
+                    val = strtok(NULL, ":");
+                    status = trim(val, 1);
+                    break;
+                }
+            }
+            fclose(fp);
+        }
+        // else
+        // {
+        //     printf("Error: Process doesnot exist.\n");
+        // }
+    }
+    free(buff);
+    return status;
+}
+
 char *getExecutablePath(int pid, char *homeDir)
 {
     char *path = "";
@@ -99,15 +134,12 @@ char *getExecutablePath(int pid, char *homeDir)
 
 void pinfo(char *data, char *homeDir)
 {
-    int pid = getpid();
+    int pid = getppid();
     if (data != NULL)
     {
         pid = atoi(strtok(data, " "));
     }
-    char *pstatus, *memory, *path;
 
-    char *buff = (char *)malloc(sizeof(char) * 100);
-    sprintf(buff, "/proc/%d/status", pid);
     // if (buff != NULL)
     // {
     //     char *rowStore, *colStore;
@@ -118,19 +150,12 @@ void pinfo(char *data, char *homeDir)
     //         row = strtok_r(NULL, "\n", rowStore);
     //     }
     // }
-    free(buff);
-
-    buff = (char *)malloc(sizeof(char) * 100);
-    sprintf(buff, "/proc/%d/exe", pid);
-    if (buff != NULL)
-    {
-    }
 
     printf("pid -- %d\n", pid);
     if (getProcessStatus(pid) != NULL)
     {
         printf("Process Status  -- %s\n", getProcessStatus(pid));
-        printf("memory -- %d\n", getMemory(pid));
+        printf("memory -- %s\n", getVirtualMemory(pid));
         printf("Executable Path -- %s\n", getExecutablePath(pid, homeDir));
     }
     else

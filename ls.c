@@ -215,7 +215,3 @@ int ls(char *data, char *homeDir, char *mode)
         }
     }
 }
-
-// https://stackoverflow.com/questions/13554150/implementing-the-ls-al-command-in-c
-// https://github.com/kaustubhhiware/Cshell/blob/master/shell.c
-// https://www.le.ac.uk/oerresources/bdra/unix/page_38.htm

@@ -30,4 +30,10 @@
 // // for basename
 // #include <libgen.h>
 
+// for handling signals
+#include <signal.h>
+
+// for waitpid
+#include <sys/wait.h>
+
 #define BUFFSIZE 4096

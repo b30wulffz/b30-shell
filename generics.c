@@ -16,12 +16,20 @@ char *getCurrentUser()
     return pw->pw_name;
 }
 
-char *trim(char *src)
+char *trim(char *src, int endline)
 {
     char *dest = (char *)malloc(strlen(src) * sizeof(char));
     if (src != NULL)
     {
-        int i = 0, j = strlen(src) - 2;
+        int i = 0, j;
+        if (endline == 1)
+        {
+            j = strlen(src) - 2;
+        }
+        else
+        {
+            j = strlen(src) - 1;
+        }
         // from beginning
         while (src[i] == ' ' || src[i] == '\t')
         {
@@ -185,4 +193,62 @@ char *rootPathResolve(char *originalPath, char *homeDir)
         resolvedPath = originalPath;
     }
     return resolvedPath;
+}
+
+int split(char *string, char delimiter, char **dest, int buffsize)
+{
+    int arrInd = 0;
+    if (string != NULL)
+    {
+        char *partition = (char *)malloc(buffsize * sizeof(char));
+
+        int i = 0, j = strlen(string) - 1;
+
+        int ind = 0, flag = 0, flagCodes = 0, loop = 0;
+
+        // printf("%s\n", string);
+
+        while (i <= j)
+        {
+            loop = 1;
+            if (string[i] == '"' || string[i] == '\'')
+            {
+                if (flagCodes == 0)
+                {
+                    flagCodes = 1;
+                }
+                else
+                {
+                    flagCodes = 0;
+                }
+            }
+            if ((string[i] == delimiter) && flagCodes == 0)
+            {
+                flag = 1;
+            }
+            else
+            {
+                if (flag == 1)
+                {
+                    partition[ind] = '\0';
+                    dest[arrInd] = partition;
+                    partition = (char *)malloc(1024 * sizeof(char));
+                    flag = 0;
+                    ind = 0;
+                    arrInd++;
+                }
+                partition[ind] = string[i];
+                ind++;
+                // printf("%c %d\n", string[i], ind);
+            }
+            i++;
+        }
+        if (loop == 1)
+        {
+            partition[ind] = '\0';
+            dest[arrInd] = partition;
+            arrInd++;
+        }
+    }
+    return arrInd;
 }
