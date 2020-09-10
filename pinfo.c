@@ -134,7 +134,7 @@ char *getExecutablePath(int pid, char *homeDir)
 
 void pinfo(char **parsedCommand, int parsedLength, char *homeDir)
 {
-    int pid = getppid();
+    int pid = getpid();
     if (parsedLength > 1)
     {
         pid = atoi(parsedCommand[1]);
