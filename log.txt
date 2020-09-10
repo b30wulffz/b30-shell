@@ -1,0 +1,10 @@
+vi
+[2
+2Rps
+ps
+sleep
+ls
+pinfo
+ps
+ll
+exit

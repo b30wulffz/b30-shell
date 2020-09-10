@@ -8,10 +8,13 @@
 #include "ls.h"
 #include "pinfo.h"
 #include "execute.h"
+#include "cleanup.h"
+#include "history.h"
 
 void executeCommand(char **parsed, int parsedLength)
 {
     int isBackground = 0;
+
     if (strcmp(parsed[parsedLength - 1], "&") == 0)
     {
         isBackground = 1;
@@ -19,45 +22,59 @@ void executeCommand(char **parsed, int parsedLength)
         parsedLength--;
     }
 
-    char *homeDir = getHomeDir();
-    char *command = parsed[0];
-    if (strcmp(command, "cd") == 0)
+    if (parsedLength > 0)
     {
-        cd(parsed[1], homeDir);
-    }
-    else if (strcmp(command, "pwd") == 0)
-    {
-        printf("%s\n", pwd());
-    }
-    else if (strcmp(command, "echo") == 0)
-    {
-        echo(parsed, parsedLength);
-    }
-    else if (strcmp(command, "ls") == 0)
-    {
-        ls(parsed, parsedLength, homeDir, "ls");
-    }
-    else if (strcmp(command, "la") == 0)
-    {
-        ls(parsed, parsedLength, homeDir, "la");
-    }
-    else if (strcmp(command, "ll") == 0)
-    {
-        ls(parsed, parsedLength, homeDir, "ll");
-    }
-    else if (strcmp(command, "pinfo") == 0)
-    {
-        pinfo(parsed, parsedLength, homeDir);
-    }
-    else
-    {
-        execute(parsed, parsedLength, isBackground);
+        char *homeDir = getHomeDir();
+        char *command = parsed[0];
+
+        saveCommand(command);
+
+        if (strcmp(command, "cd") == 0)
+        {
+            cd(parsed[1], homeDir);
+        }
+        else if (strcmp(command, "pwd") == 0)
+        {
+            printf("%s\n", pwd());
+        }
+        else if (strcmp(command, "echo") == 0)
+        {
+            echo(parsed, parsedLength);
+        }
+        else if (strcmp(command, "ls") == 0)
+        {
+            ls(parsed, parsedLength, homeDir, "ls");
+        }
+        else if (strcmp(command, "la") == 0)
+        {
+            ls(parsed, parsedLength, homeDir, "la");
+        }
+        else if (strcmp(command, "ll") == 0)
+        {
+            ls(parsed, parsedLength, homeDir, "ll");
+        }
+        else if (strcmp(command, "pinfo") == 0)
+        {
+            pinfo(parsed, parsedLength, homeDir);
+        }
+        else if (strcmp(command, "history") == 0)
+        {
+            history();
+        }
+        else if (strcmp(command, "exit") == 0)
+        {
+            cleanup();
+        }
+        else
+        {
+            execute(parsed, parsedLength, isBackground);
+        }
     }
 }
 
 void runCommand(char *command)
 {
-    printf("--->%s<---\n", command);
+    // printf("--->%s<---\n", command);
     char **parsed = (char **)malloc((sizeof(char) * 1024) * 1024);
     int parsedLength = split(command, ' ', parsed, 1024);
 

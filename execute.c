@@ -1,4 +1,8 @@
 #include "headers.h"
+#include "pinfo.h"
+#include "globals.h"
+#include "definitions.h"
+#include "childproc.h"
 
 void execute(char **data, int len, int isBackground)
 {
@@ -12,16 +16,22 @@ void execute(char **data, int len, int isBackground)
             {
                 waitpid(pid, NULL, 0);
             }
+            else
+            {
+                processDetails *node = addProcNode(pid, data[0], getChildProcessList());
+                printf("[%d] %d\n", getProcNum(getChildProcessList()), node->pid);
+            }
         }
         else if (pid == 0)
         {
+            //child
             if (isBackground == 1)
             {
                 setpgid(0, 0);
-                printf("[] %d\n", getpid());
             }
             execvp(data[0], data);
             printf("%s: Command not found\n", data[0]);
+            exit(0);
         }
         else
         {

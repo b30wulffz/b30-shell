@@ -1,33 +1,25 @@
 #include "headers.h"
+#include "generics.h"
 
 int cd(char *path, char *homeDir)
 {
-    char homeSymbol[] = "~";
     if (path != NULL)
     {
-        if (strcmp(path, homeSymbol) == 0)
+        if (path[0] == '~')
         {
-            if (chdir(homeDir) == 0)
-            {
-                return 1;
-            }
-            else
-            {
-                perror("chdir() failed");
-                return 0;
-            }
+            char *tmp = substr(path, 1, strlen(path));
+            path = concat(homeDir, tmp);
+            free(tmp);
+        }
+
+        if (chdir(path) == 0)
+        {
+            return 1;
         }
         else
         {
-            if (chdir(path) == 0)
-            {
-                return 1;
-            }
-            else
-            {
-                perror("chdir() failed");
-                return 0;
-            }
+            perror("Error");
+            return 0;
         }
     }
 }

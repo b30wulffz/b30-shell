@@ -40,6 +40,7 @@ void printFlagL(struct dirent *file, struct stat fileStat)
 
 void printLS(char *name, int flag_a, int flag_l)
 {
+
     DIR *dir = opendir(name);
     struct dirent *file;
     struct stat fileStat;
@@ -61,36 +62,45 @@ void printLS(char *name, int flag_a, int flag_l)
             printf("total %d\n", total / 2);
         }
         dir = opendir(name);
-        while ((file = readdir(dir)) != NULL)
+        if (dir != NULL)
         {
-            char *buf = (char *)malloc(sizeof(char) * BUFFSIZE);
-            sprintf(buf, "%s/%s", name, file->d_name);
-            stat(buf, &fileStat);
-            if (flag_a == 1 && flag_l == 1)
+            while ((file = readdir(dir)) != NULL)
             {
-                printFlagL(file, fileStat);
-            }
-            else if (flag_a == 1)
-            {
-                printf("%s  ", file->d_name);
-            }
-            else if (flag_l == 1)
-            {
-                if (file->d_name[0] != '.')
+                char *buf = (char *)malloc(sizeof(char) * BUFFSIZE);
+                sprintf(buf, "%s/%s", name, file->d_name);
+                stat(buf, &fileStat);
+                if (flag_a == 1 && flag_l == 1)
                 {
                     printFlagL(file, fileStat);
                 }
-            }
-            else
-            {
-                if (file->d_name[0] != '.')
+                else if (flag_a == 1)
                 {
                     printf("%s  ", file->d_name);
                 }
-            }
-            free(buf);
+                else if (flag_l == 1)
+                {
+                    if (file->d_name[0] != '.')
+                    {
+                        printFlagL(file, fileStat);
+                    }
+                }
+                else
+                {
+                    if (file->d_name[0] != '.')
+                    {
+                        printf("%s  ", file->d_name);
+                    }
+                }
+                free(buf);
 
-            // printf("%16ld %16s \n", fileStat.st_size, file->d_name);
+                // printf("%16ld %16s \n", fileStat.st_size, file->d_name);
+            }
+        }
+        else
+        {
+            char *buf = (char *)malloc(sizeof(char) * BUFFSIZE);
+            sprintf(buf, "ls: cannot access '%s'", name);
+            perror(buf);
         }
         printf("\n");
     }
@@ -105,6 +115,7 @@ void printLS(char *name, int flag_a, int flag_l)
 
 int ls(char **parsedCommand, int parsedLength, char *homeDir, char *mode)
 {
+    // printf("hiiiiii");
     if (parsedCommand != NULL && parsedLength > 1)
     {
         // printf("##%s", data);

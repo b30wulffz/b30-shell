@@ -13,7 +13,7 @@ char *pwd()
     }
     else
     {
-        perror("Error with getcwd()");
+        // perror("Error: Path cannot be accessed.\n");
         return "";
     }
 }

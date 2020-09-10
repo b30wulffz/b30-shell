@@ -37,3 +37,5 @@
 #include <sys/wait.h>
 
 #define BUFFSIZE 4096
+#define MAXHISTORY 20
+#define HISTORYCOUNT 10

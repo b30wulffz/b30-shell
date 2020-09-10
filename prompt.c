@@ -3,7 +3,7 @@
 #include "pwd.h"
 #include "globals.h"
 
-void prompt(char *homeDir)
+void prompt()
 {
     char *username = getCurrentUser();
     char *hostname = getHostName();
