@@ -132,12 +132,12 @@ char *getExecutablePath(int pid, char *homeDir)
     return path;
 }
 
-void pinfo(char *data, char *homeDir)
+void pinfo(char **parsedCommand, int parsedLength, char *homeDir)
 {
     int pid = getppid();
-    if (data != NULL)
+    if (parsedLength > 1)
     {
-        pid = atoi(strtok(data, " "));
+        pid = atoi(parsedCommand[1]);
     }
 
     // if (buff != NULL)

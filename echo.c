@@ -1,14 +1,18 @@
 #include "headers.h"
 
-int echo(char *data)
+int echo(char **parsedCommand, int parsedLength)
 {
-    if (data == NULL)
+    if (parsedLength > 1)
     {
-        printf("\n");
+        for (int i = 1; i < parsedLength; i++)
+        {
+            if (i > 1)
+            {
+                printf(" ");
+            }
+            printf("%s", parsedCommand[i]);
+        }
     }
-    else
-    {
-        printf("%s\n", data);
-    }
+    printf("\n");
     return 1;
 }

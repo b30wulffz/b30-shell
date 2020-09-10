@@ -103,18 +103,18 @@ void printLS(char *name, int flag_a, int flag_l)
     }
 }
 
-int ls(char *data, char *homeDir, char *mode)
+int ls(char **parsedCommand, int parsedLength, char *homeDir, char *mode)
 {
-    if (data != NULL)
+    if (parsedCommand != NULL && parsedLength > 1)
     {
         // printf("##%s", data);
-        char *tmpData;
-        if (data != NULL)
-        {
-            tmpData = (char *)malloc(strlen(data) * sizeof(char));
-            strcpy(tmpData, data);
-        }
-        char *word = strtok(data, " ");
+        // char *tmpData;
+        // if (data != NULL)
+        // {
+        //     tmpData = (char *)malloc(strlen(data) * sizeof(char));
+        //     strcpy(tmpData, data);
+        // }
+        // char *word = strtok(data, " ");
 
         int flag_a, flag_l;
         flag_a = flag_l = 0;
@@ -132,8 +132,9 @@ int ls(char *data, char *homeDir, char *mode)
 
         // extracting flags
 
-        while (word != NULL)
+        for (int i = 1; i < parsedLength; i++)
         {
+            char *word = parsedCommand[i];
             if (word[0] == '-')
             {
                 for (int i = 1; i < strlen(word); i++)
@@ -152,7 +153,6 @@ int ls(char *data, char *homeDir, char *mode)
             {
                 count++;
             }
-            word = strtok(NULL, " ");
         }
 
         // for arguments
@@ -160,10 +160,10 @@ int ls(char *data, char *homeDir, char *mode)
         if (count > 0)
         {
             // if arguments are supplied
-            word = strtok(tmpData, " ");
             // printf("$$%s", word);
-            while (word != NULL)
+            for (int i = 1; i < parsedLength; i++)
             {
+                char *word = parsedCommand[i];
                 if (word[0] != '-')
                 {
                     char *path = word, flag = 0;
@@ -190,7 +190,6 @@ int ls(char *data, char *homeDir, char *mode)
                         free(path);
                     }
                 }
-                word = strtok(NULL, " ");
             }
         }
         else
