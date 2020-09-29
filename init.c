@@ -30,11 +30,11 @@ void childProcHandler(int id)
         {
             if ((WIFEXITED(status) != 0) && (WEXITSTATUS(status) == EXIT_SUCCESS))
             {
-                printf("Process with pid %d exited normally\n", node->pid);
+                printf("Process with pid %d exited normally\n", pid);
             }
             else
             {
-                printf("Process with pid %d exited abnormally\n", node->pid);
+                printf("Process with pid %d exited abnormally\n", pid);
             }
         }
         prompt();
@@ -48,8 +48,8 @@ void init()
     signal(SIGINT, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
     signal(SIGQUIT, SIG_IGN);
-    signal(SIGTTIN, SIG_IGN);
-    signal(SIGTTOU, SIG_IGN);
+    // signal(SIGTTIN, SIG_IGN);
+    // signal(SIGTTOU, SIG_IGN);
     signal(SIGCHLD, childProcHandler);
     initialiseChildProcessList();
     initHistoryList();

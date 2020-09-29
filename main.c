@@ -18,6 +18,9 @@ int main()
     {
         prompt();
         shellInput(homeDir);
+        fflush(stdin);
+        fflush(stdout);
+        // sleep(1);
     }
 
     return 0;
