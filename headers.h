@@ -36,6 +36,9 @@
 // for waitpid
 #include <sys/wait.h>
 
+// for open
+#include <fcntl.h>
+
 #define BUFFSIZE 4096
 #define MAXHISTORY 20
 #define HISTORYCOUNT 10

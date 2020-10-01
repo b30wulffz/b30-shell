@@ -10,11 +10,13 @@
 #include "execute.h"
 #include "cleanup.h"
 #include "history.h"
+#include "envvar.h"
 
 void executeCommand(char **parsed, int parsedLength)
 {
     int isBackground = 0;
 
+    // printf("executeeeeee");
     if (strcmp(parsed[parsedLength - 1], "&") == 0)
     {
         isBackground = 1;
@@ -65,6 +67,18 @@ void executeCommand(char **parsed, int parsedLength)
         {
             history();
         }
+        else if (strcmp(command, "setenv") == 0)
+        {
+            setEnv(parsed, parsedLength);
+        }
+        else if (strcmp(command, "getenv") == 0)
+        {
+            getEnv(parsed, parsedLength);
+        }
+        else if (strcmp(command, "unsetenv") == 0)
+        {
+            unsetEnv(parsed, parsedLength);
+        }
         else if (strcmp(command, "exit") == 0)
         {
             cleanup();
@@ -75,13 +89,6 @@ void executeCommand(char **parsed, int parsedLength)
         }
     }
 }
-
-// void parseIORedir(char **parsed, int parsedLength)
-// {
-//     for(int i=0; i<parsedLength; i++){
-//         if
-//     }
-// }
 
 void runCommand(char *command)
 {
@@ -97,9 +104,167 @@ void runCommand(char *command)
     }
 
     free(parsed);
+    // free(trimmedCommand);
 }
 
-void parseIORedir2(char *command)
+void parseIORedir(char *command)
+{
+    char *trimmedCommand = trim(command, 0);
+
+    char **parsed = (char **)malloc((sizeof(char) * 1024) * 1024);
+    int parsedLength = split(trimmedCommand, ' ', parsed, 1024);
+
+    int ipFlag, opFlag, opaFlag;
+    ipFlag = opFlag = opaFlag = 0;
+    int firstInd = parsedLength;
+
+    int fin = 0, fop = 0;
+    // char * input;
+
+    for (int i = 0; i < parsedLength; i++)
+    {
+        if (strcmp(parsed[i], "<") == 0)
+        {
+            ipFlag = 1;
+            opFlag = 0;
+            opaFlag = 0;
+            if (firstInd == parsedLength)
+            {
+                firstInd = i;
+            }
+        }
+        else if (strcmp(parsed[i], ">") == 0)
+        {
+            ipFlag = 0;
+            opFlag = 1;
+            opaFlag = 0;
+            if (firstInd == parsedLength)
+            {
+                firstInd = i;
+            }
+        }
+        else if (strcmp(parsed[i], ">>") == 0)
+        {
+            ipFlag = 0;
+            opFlag = 0;
+            opaFlag = 1;
+            if (firstInd == parsedLength)
+            {
+                firstInd = i;
+            }
+        }
+        else
+        {
+            if (ipFlag)
+            {
+                if (fin != 0)
+                {
+                    close(fin);
+                }
+                fin = open(parsed[i], O_RDONLY);
+                if (fin == -1)
+                {
+                    perror("Source file does not exist");
+                    return;
+                }
+            }
+            if (opFlag || opaFlag)
+            {
+                if (fop != 0)
+                {
+                    close(fop);
+                }
+                if (opaFlag)
+                {
+                    fop = open(parsed[i], O_WRONLY | O_CREAT | O_APPEND, 0644);
+                }
+                else
+                {
+                    fop = open(parsed[i], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                }
+                if (fop == -1)
+                {
+                    perror("Error while opening file for writing");
+                    return;
+                }
+            }
+        }
+    }
+
+    int stdinBkp = dup(STDIN_FILENO);
+    if (stdinBkp == -1)
+    {
+        perror("Error duplicating STDIN file descriptor");
+        return;
+    }
+
+    int stdoutBkp = dup(STDOUT_FILENO);
+    if (stdoutBkp == -1)
+    {
+        perror("Error duplicating STDOUT file descriptor");
+        return;
+    }
+
+    // setting input redirection
+    if (fin != 0)
+    {
+        if (dup2(fin, STDIN_FILENO) == -1)
+        {
+            perror("Error overwriting STDIN file descriptor");
+            return;
+        }
+    }
+
+    // setting output redirection
+    if (fop != 0)
+    {
+        if (dup2(fop, STDOUT_FILENO) == -1)
+        {
+            perror("Error overwriting STDOUT file descriptor");
+            return;
+        }
+    }
+
+    int len = 0;
+    for (int i = 0; i < firstInd; i++)
+    {
+        if (i != (firstInd - 1))
+        {
+            len += 1;
+        }
+        len += strlen(parsed[i]);
+    }
+    char *mainCommand = substr(command, 0, len);
+    runCommand(mainCommand);
+
+    if (fin != 0)
+    {
+        close(fin);
+    }
+
+    if (fop != 0)
+    {
+        close(fop);
+    }
+
+    if (dup2(stdinBkp, STDIN_FILENO) == -1)
+    {
+        perror("Error overwriting STDIN file descriptor");
+        return;
+    }
+
+    if (dup2(stdoutBkp, STDOUT_FILENO) == -1)
+    {
+        perror("Error overwriting STDOUT file descriptor");
+        return;
+    }
+
+    free(mainCommand);
+    free(parsed);
+    free(trimmedCommand);
+}
+
+void parsePipes2(char *command)
 {
     char **splitCommand = (char **)malloc((sizeof(char) * 1024) * 1024);
     int splitCommandLength = split(command, '|', splitCommand, 1024);
@@ -210,7 +375,7 @@ void parseIORedir2(char *command)
     exit(EXIT_SUCCESS);
 }
 
-void parseIORedir(char *command)
+void parsePipes(char *command)
 {
     char **splitCommand = (char **)malloc((sizeof(char) * 1024) * 1024);
     int splitCommandLength = split(command, '|', splitCommand, 1024);
@@ -230,29 +395,47 @@ void parseIORedir(char *command)
             return;
         }
 
-        int vfile[2];
-        if (pipe(vfile) == -1)
+        int pipeFile[splitCommandLength][2];
+        for (int i = 0; i < splitCommandLength; i++)
         {
-            perror("Error Creating Pipe");
-            return;
+            if (pipe(pipeFile[i]) == -1)
+            {
+                perror("Error Creating Pipe");
+                return;
+            }
         }
+        // int vfile[2];
 
-        if (dup2(vfile[0], STDIN_FILENO) == -1)
-        {
-            perror("Error overwriting STDIN file descriptor");
-            return;
-        }
-        if (dup2(vfile[1], STDOUT_FILENO) == -1)
-        {
-            perror("Error overwriting STDOUT file descriptor");
-            return;
-        }
-
+        // if (dup2(vfile[0], STDIN_FILENO) == -1)
+        // {
+        //     perror("Error overwriting STDIN file descriptor");
+        //     return;
+        // }
+        // if (dup2(vfile[1], STDOUT_FILENO) == -1)
+        // {
+        //     perror("Error overwriting STDOUT file descriptor");
+        //     return;
+        // }
+        printf("-->%d\n", splitCommandLength);
         for (int i = 0; i < splitCommandLength - 1; i++)
         {
+            close(pipeFile[i][1]);
+            if (dup2(pipeFile[i][0], STDIN_FILENO) == -1)
+            {
+                perror("Error overwriting STDIN file descriptor");
+                return;
+            }
+            if (dup2(pipeFile[i + 1][1], STDOUT_FILENO) == -1)
+            {
+                perror("Error overwriting STDOUT file descriptor");
+                return;
+            }
             runCommand(splitCommand[i]);
+            // parseIORedir(splitCommand[i]);
+            close(pipeFile[i][0]);
         }
 
+        close(pipeFile[splitCommandLength - 1][1]);
         if (dup2(stdoutBkp, STDOUT_FILENO) == -1)
         {
             perror("Error overwriting STDOUT file descriptor");
@@ -269,10 +452,22 @@ void parseIORedir(char *command)
         else
         {
             // close(vfile[0]);
-            close(vfile[1]);
+            if (dup2(pipeFile[splitCommandLength - 1][0], STDIN_FILENO) == -1)
+            {
+                perror("Error overwriting STDIN file descriptor");
+                return;
+            }
         }
+        // close(pipeFile[splitCommandLength - 2][1]);
+        printf("%s", splitCommand[splitCommandLength - 1]);
         runCommand(splitCommand[splitCommandLength - 1]);
-        close(vfile[0]);
+        // parseIORedir(splitCommand[splitCommandLength - 1]);
+        if (dup2(stdinBkp, STDIN_FILENO) == -1)
+        {
+            perror("Error overwriting STDIN file descriptor");
+            return;
+        }
+        close(pipeFile[splitCommandLength - 1][0]);
     }
     free(splitCommand);
     // sleep(2);
@@ -304,7 +499,7 @@ void parseInput(char *buffer)
     {
         char *trimmedCommand = trim(splitCommands[i], 0);
         // runCommand(trimmedCommand);
-        parseIORedir(trimmedCommand);
+        parsePipes(trimmedCommand);
         free(trimmedCommand);
     }
 
