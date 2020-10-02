@@ -107,10 +107,10 @@ void runCommand(char *command)
     // free(trimmedCommand);
 }
 
-void parseIORedir(char *command)
+void parseIORedir(char *command, int stdinBkp2, int stdoutBkp2)
 {
     char *trimmedCommand = trim(command, 0);
-
+    // printf("-> %s -- ", trimmedCommand);
     char **parsed = (char **)malloc((sizeof(char) * 1024) * 1024);
     int parsedLength = split(trimmedCommand, ' ', parsed, 1024);
 
@@ -191,23 +191,31 @@ void parseIORedir(char *command)
         }
     }
 
-    int stdinBkp = dup(STDIN_FILENO);
-    if (stdinBkp == -1)
-    {
-        perror("Error duplicating STDIN file descriptor");
-        return;
-    }
+    int stdinBkp, stdoutBkp;
 
-    int stdoutBkp = dup(STDOUT_FILENO);
-    if (stdoutBkp == -1)
-    {
-        perror("Error duplicating STDOUT file descriptor");
-        return;
-    }
+    // int stdinBkp = dup(STDIN_FILENO);
+    // if (stdinBkp == -1)
+    // {
+    //     perror("Error duplicating STDIN file descriptor");
+    //     return;
+    // }
+
+    // int stdoutBkp = dup(STDOUT_FILENO);
+    // if (stdoutBkp == -1)
+    // {
+    //     perror("Error duplicating STDOUT file descriptor");
+    //     return;
+    // }
 
     // setting input redirection
     if (fin != 0)
     {
+        // stdinBkp = dup(STDIN_FILENO);
+        // if (stdinBkp == -1)
+        // {
+        //     perror("Error duplicating STDIN file descriptor");
+        //     return;
+        // }
         if (dup2(fin, STDIN_FILENO) == -1)
         {
             perror("Error overwriting STDIN file descriptor");
@@ -218,6 +226,12 @@ void parseIORedir(char *command)
     // setting output redirection
     if (fop != 0)
     {
+        // stdoutBkp = dup(STDOUT_FILENO);
+        // if (stdoutBkp == -1)
+        // {
+        //     perror("Error duplicating STDOUT file descriptor");
+        //     return;
+        // }
         if (dup2(fop, STDOUT_FILENO) == -1)
         {
             perror("Error overwriting STDOUT file descriptor");
@@ -234,29 +248,38 @@ void parseIORedir(char *command)
         }
         len += strlen(parsed[i]);
     }
-    char *mainCommand = substr(command, 0, len);
+
+    char *mainCommand = substr(trimmedCommand, 0, len);
+    // printf("-> %s %d\n", mainCommand, len);
     runCommand(mainCommand);
+
+    // if (fin != 0)
+    // {
+    //     close(fin);
+    // }
+    // if (fop != 0)
+    // {
+    //     close(fop);
+    // }
 
     if (fin != 0)
     {
+        if (dup2(stdinBkp2, STDIN_FILENO) == -1)
+        {
+            perror("Error overwriting STDIN file descriptor");
+            return;
+        }
         close(fin);
     }
 
     if (fop != 0)
     {
+        if (dup2(stdoutBkp2, STDOUT_FILENO) == -1)
+        {
+            perror("Error overwriting STDOUT file descriptor");
+            return;
+        }
         close(fop);
-    }
-
-    if (dup2(stdinBkp, STDIN_FILENO) == -1)
-    {
-        perror("Error overwriting STDIN file descriptor");
-        return;
-    }
-
-    if (dup2(stdoutBkp, STDOUT_FILENO) == -1)
-    {
-        perror("Error overwriting STDOUT file descriptor");
-        return;
     }
 
     free(mainCommand);
@@ -416,23 +439,33 @@ void parsePipes(char *command)
         //     perror("Error overwriting STDOUT file descriptor");
         //     return;
         // }
-        printf("-->%d\n", splitCommandLength);
+        // printf("-->%d\n", splitCommandLength);
         for (int i = 0; i < splitCommandLength - 1; i++)
         {
-            close(pipeFile[i][1]);
-            if (dup2(pipeFile[i][0], STDIN_FILENO) == -1)
+            if (i != 0)
             {
-                perror("Error overwriting STDIN file descriptor");
-                return;
+                close(pipeFile[i][1]);
+                if (dup2(pipeFile[i][0], STDIN_FILENO) == -1)
+                {
+                    perror("Error overwriting STDIN file descriptor");
+                    return;
+                }
             }
             if (dup2(pipeFile[i + 1][1], STDOUT_FILENO) == -1)
             {
                 perror("Error overwriting STDOUT file descriptor");
                 return;
             }
-            runCommand(splitCommand[i]);
-            // parseIORedir(splitCommand[i]);
-            close(pipeFile[i][0]);
+            // runCommand(splitCommand[i]);
+            if (i != 0)
+            {
+                parseIORedir(splitCommand[i], pipeFile[i][0], pipeFile[i + 1][1]);
+                close(pipeFile[i][0]);
+            }
+            else
+            {
+                parseIORedir(splitCommand[i], stdinBkp, pipeFile[i + 1][1]);
+            }
         }
 
         close(pipeFile[splitCommandLength - 1][1]);
@@ -448,6 +481,7 @@ void parsePipes(char *command)
                 perror("Error overwriting STDIN file descriptor");
                 return;
             }
+            parseIORedir(splitCommand[splitCommandLength - 1], stdinBkp, stdoutBkp);
         }
         else
         {
@@ -457,11 +491,12 @@ void parsePipes(char *command)
                 perror("Error overwriting STDIN file descriptor");
                 return;
             }
+            parseIORedir(splitCommand[splitCommandLength - 1], pipeFile[splitCommandLength - 1][0], stdoutBkp);
         }
         // close(pipeFile[splitCommandLength - 2][1]);
-        printf("%s", splitCommand[splitCommandLength - 1]);
-        runCommand(splitCommand[splitCommandLength - 1]);
-        // parseIORedir(splitCommand[splitCommandLength - 1]);
+        // printf("%s", splitCommand[splitCommandLength - 1]);
+        // runCommand(splitCommand[splitCommandLength - 1]);
+        // parseIORedir(splitCommand[splitCommandLength - 1], );
         if (dup2(stdinBkp, STDIN_FILENO) == -1)
         {
             perror("Error overwriting STDIN file descriptor");
