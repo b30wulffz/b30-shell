@@ -5,6 +5,7 @@
 
 int terminalFG()
 {
+    setCurrentFgPid(-1);
     if (tcsetpgrp(STDIN_FILENO, getpgrp()) == -1)
     {
         perror("Error, terminal cannot be made foreground");
@@ -53,6 +54,7 @@ int fg(char **parsedCommand, int parsedLength)
                 return -1;
             }
 
+            setCurrentFgPid(tmpProcess->pid);
             deleteProcNode(process->pid, getChildProcessList());
             //wait for foreground process to finish
             int status;
@@ -70,7 +72,6 @@ int fg(char **parsedCommand, int parsedLength)
                     printf("[%d] %d\n", node->jobid, node->pid);
                 }
             }
-            //delete from bg process list
 
             //recover terminal
             free(tmpProcess);

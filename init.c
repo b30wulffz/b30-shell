@@ -68,13 +68,7 @@ void ctrlZHandler()
     {
         if (kill(currentFgPid, SIGTSTP) != -1)
         {
-            // setpgid(currentFgPid, 0);
-            // addProcNode(currentFgPid, "AA", "AAA", getChildProcessList());
             setCurrentFgPid(-1);
-            // addProcNode();
-            // tcsetpgrp(STDIN_FILENO, getpgrp());
-            // signal(SIGTTIN, SIG_DFL);
-            // signal(SIGTTOU, SIG_DFL);
         }
     }
 }
@@ -83,10 +77,7 @@ void init()
 {
     setHomeDir(pwd());
     signal(SIGINT, ctrlCHandler);
-    // signal(SIGTSTP, SIG_IGN);
     // signal(SIGQUIT, SIG_IGN);
-    // signal(SIGTTIN, SIG_IGN);
-    // signal(SIGTTOU, SIG_IGN);
     signal(SIGCHLD, childProcHandler);
     signal(SIGTSTP, ctrlZHandler);
     initialiseChildProcessList();
