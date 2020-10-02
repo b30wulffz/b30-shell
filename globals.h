@@ -18,6 +18,9 @@ void setHistoryLength(int len);
 void setOldDir(char *dir);
 char *getOldDir();
 
+void setCurrentFgPid(int fgPid);
+int getCurrentFgPid();
+
 // extern processDetails *childProcessList;
 
 #endif

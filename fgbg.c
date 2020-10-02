@@ -36,34 +36,44 @@ int fg(char **parsedCommand, int parsedLength)
         }
         if (found)
         {
+            processDetails *tmpProcess = generateProcNode(process->pid, process->pname, process->command, process->jobid);
+
             signal(SIGTTIN, SIG_IGN);
             signal(SIGTTOU, SIG_IGN);
 
-            if (tcsetpgrp(STDIN_FILENO, process->pid) == -1)
+            if (tcsetpgrp(STDIN_FILENO, tmpProcess->pid) == -1)
             {
                 perror("Error, process cannot be made foreground");
                 return -1;
             }
-            if (kill(process->pid, SIGCONT) == -1)
+            if (kill(tmpProcess->pid, SIGCONT) == -1)
             {
                 perror("Error, SIGCONT signal cannot be sent to the process");
                 terminalFG();
                 return -1;
             }
 
+            deleteProcNode(process->pid, getChildProcessList());
             //wait for foreground process to finish
             int status;
-            if (waitpid(process->pid, &status, WUNTRACED) == -1)
+            if (waitpid(tmpProcess->pid, &status, WUNTRACED) == -1)
             {
                 perror("Error, process cannot finish");
                 terminalFG();
                 return -1;
             }
-
+            if (WIFSTOPPED(status) != 0)
+            {
+                if (getCurrentFgPid() != -1)
+                {
+                    processDetails *node = addProcNode(tmpProcess->pid, tmpProcess->pname, tmpProcess->command, getChildProcessList());
+                    printf("[%d] %d\n", node->jobid, node->pid);
+                }
+            }
             //delete from bg process list
-            deleteProcNode(process->pid, getChildProcessList());
 
             //recover terminal
+            free(tmpProcess);
             return terminalFG();
         }
         else

@@ -131,3 +131,17 @@ char *getOldDir()
 {
     return oldDir;
 }
+
+/* ***************************** */
+
+int currentFgPid = -1;
+
+void setCurrentFgPid(int fgPid)
+{
+    currentFgPid = fgPid;
+}
+
+int getCurrentFgPid()
+{
+    return currentFgPid;
+}
