@@ -119,3 +119,15 @@ void setHistoryLength(int len)
 // }
 
 /* ***************************** */
+
+char *oldDir = NULL;
+
+void setOldDir(char *dir)
+{
+    oldDir = dir;
+}
+
+char *getOldDir()
+{
+    return oldDir;
+}

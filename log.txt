@@ -1,12 +1,3 @@
-ls
-cd
-ls
-ll
-ls
-ll
-exit
-cd
-ls
 make
 exit
 cd
@@ -17,4 +8,13 @@ ls
 ll
 ls
 cd
+git
+ls
+exit
+cd
+make
+exit
+ls
+cd
+path
 git

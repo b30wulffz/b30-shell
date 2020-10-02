@@ -15,6 +15,9 @@ char **getHistoryList();
 int getHistoryLength();
 void setHistoryLength(int len);
 
+void setOldDir(char *dir);
+char *getOldDir();
+
 // extern processDetails *childProcessList;
 
 #endif
