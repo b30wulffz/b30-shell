@@ -10,35 +10,42 @@
 void childProcHandler(int id)
 {
     int status;
-    int pid = waitpid(-1, &status, WNOHANG);
-    if (pid > 0)
+    while (1)
     {
-        processDetails *node = getProcNode(pid, getChildProcessList());
-        if (node != NULL)
+        int pid = waitpid(-1, &status, WNOHANG);
+        if (pid > 0)
         {
-            if ((WIFEXITED(status) != 0) && (WEXITSTATUS(status) == EXIT_SUCCESS))
+            processDetails *node = getProcNode(pid, getChildProcessList());
+            if (node != NULL)
             {
-                printf("%s with pid %d exited normally\n", node->pname, node->pid);
+                if ((WIFEXITED(status) != 0) && (WEXITSTATUS(status) == EXIT_SUCCESS))
+                {
+                    printf("%s with pid %d exited normally\n", node->pname, node->pid);
+                }
+                else
+                {
+                    printf("%s with pid %d exited abnormally\n", node->pname, node->pid);
+                }
+                deleteProcNode(node->pid, getChildProcessList());
             }
             else
             {
-                printf("%s with pid %d exited abnormally\n", node->pname, node->pid);
+                if ((WIFEXITED(status) != 0) && (WEXITSTATUS(status) == EXIT_SUCCESS))
+                {
+                    printf("Process with pid %d exited normally\n", pid);
+                }
+                else
+                {
+                    printf("Process with pid %d exited abnormally\n", pid);
+                }
             }
-            deleteProcNode(node->pid, getChildProcessList());
+            prompt();
+            fflush(stdout);
         }
         else
         {
-            if ((WIFEXITED(status) != 0) && (WEXITSTATUS(status) == EXIT_SUCCESS))
-            {
-                printf("Process with pid %d exited normally\n", pid);
-            }
-            else
-            {
-                printf("Process with pid %d exited abnormally\n", pid);
-            }
+            break;
         }
-        prompt();
-        fflush(stdout);
     }
 }
 

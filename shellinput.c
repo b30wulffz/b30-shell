@@ -11,17 +11,18 @@
 #include "cleanup.h"
 #include "history.h"
 #include "envvar.h"
+#include "jobs.h"
 
-void executeCommand(char **parsed, int parsedLength)
+void executeCommand(char **parsed, int parsedLength, char *trimmedCommand)
 {
     int isBackground = 0;
-
     // printf("executeeeeee");
     if (strcmp(parsed[parsedLength - 1], "&") == 0)
     {
         isBackground = 1;
         parsed[parsedLength - 1] = NULL;
         parsedLength--;
+        trimmedCommand = substr(trimmedCommand, 0, strlen(trimmedCommand) - 2);
     }
     else
     {
@@ -79,13 +80,25 @@ void executeCommand(char **parsed, int parsedLength)
         {
             unsetEnv(parsed, parsedLength);
         }
-        else if (strcmp(command, "exit") == 0)
+        else if (strcmp(command, "jobs") == 0)
+        {
+            jobs();
+        }
+        else if (strcmp(command, "kjob") == 0)
+        {
+            kjob(parsed, parsedLength);
+        }
+        else if (strcmp(command, "overkill") == 0)
+        {
+            overkill();
+        }
+        else if (strcmp(command, "exit") == 0 || strcmp(command, "quit") == 0)
         {
             cleanup();
         }
         else
         {
-            execute(parsed, parsedLength, isBackground);
+            execute(parsed, parsedLength, trimmedCommand, isBackground);
         }
     }
 }
@@ -100,7 +113,7 @@ void runCommand(char *command)
 
     if (parsedLength > 0 && parsed != NULL)
     {
-        executeCommand(parsed, parsedLength);
+        executeCommand(parsed, parsedLength, trimmedCommand);
     }
 
     free(parsed);

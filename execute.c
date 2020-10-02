@@ -4,7 +4,7 @@
 #include "definitions.h"
 #include "childproc.h"
 
-void execute(char **data, int len, int isBackground)
+void execute(char **data, int len, char *trimmedCommand, int isBackground)
 {
     if (data != NULL && len > 0)
     {
@@ -18,8 +18,8 @@ void execute(char **data, int len, int isBackground)
             }
             else
             {
-                processDetails *node = addProcNode(pid, data[0], getChildProcessList());
-                printf("[%d] %d\n", getProcNum(getChildProcessList()), node->pid);
+                processDetails *node = addProcNode(pid, data[0], trimmedCommand, getChildProcessList());
+                printf("[%d] %d\n", node->jobid, node->pid);
             }
         }
         else if (pid == 0)

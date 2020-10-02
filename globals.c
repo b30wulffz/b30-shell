@@ -29,7 +29,7 @@ void initialiseChildProcessList()
 {
     if (childProcessList == NULL)
     {
-        childProcessList = generateProcNode(0, "<No Process>");
+        childProcessList = generateProcNode(0, "<No Process>", "<No Command>", 0);
     }
 }
 

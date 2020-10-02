@@ -2,16 +2,16 @@
 #include "globals.h"
 #include "definitions.h"
 
-int getProcNum(processDetails *processList)
-{
-    int count = 0;
-    while (processList->next != NULL)
-    {
-        count++;
-        processList = processList->next;
-    }
-    return count;
-}
+// int getProcNum(processDetails *processList)
+// {
+//     int count = 0;
+//     while (processList->next != NULL)
+//     {
+//         count++;
+//         processList = processList->next;
+//     }
+//     return count;
+// }
 
 processDetails *getProcNode(int pid, processDetails *processList)
 {
@@ -28,23 +28,25 @@ processDetails *getProcNode(int pid, processDetails *processList)
     return NULL;
 }
 
-processDetails *generateProcNode(int pid, char *pname)
+processDetails *generateProcNode(int pid, char *pname, char *command, int jobid)
 {
     processDetails *node = (processDetails *)malloc(sizeof(processDetails));
     node->pid = pid;
     node->pname = pname;
+    node->command = command;
+    node->jobid = jobid;
     node->next = NULL;
     return node;
 }
 
-processDetails *addProcNode(int pid, char *pname, processDetails *processList)
+processDetails *addProcNode(int pid, char *pname, char *command, processDetails *processList)
 {
-    processDetails *node = generateProcNode(pid, pname);
     processDetails *temp = processList;
     while ((temp->next) != NULL)
     {
         temp = temp->next;
     }
+    processDetails *node = generateProcNode(pid, pname, command, temp->jobid + 1);
     temp->next = node;
 
     return node;

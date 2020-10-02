@@ -5,6 +5,8 @@ struct procDetails
 {
     int pid;
     char *pname;
+    char *command;
+    int jobid;
     struct procDetails *next;
 };
 
