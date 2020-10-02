@@ -6,11 +6,12 @@
 int terminalFG()
 {
     setCurrentFgPid(-1);
-    if (tcsetpgrp(STDIN_FILENO, getpgrp()) == -1)
-    {
-        perror("Error, terminal cannot be made foreground");
-        return -1;
-    }
+    tcsetpgrp(STDIN_FILENO, getpgrp());
+    // if (tcsetpgrp(STDIN_FILENO, getpgrp()) == -1)
+    // {
+    //     perror("Error, terminal cannot be made foreground");
+    //     return -1;
+    // }
     signal(SIGTTIN, SIG_DFL);
     signal(SIGTTOU, SIG_DFL);
     return 0;
@@ -42,11 +43,12 @@ int fg(char **parsedCommand, int parsedLength)
             signal(SIGTTIN, SIG_IGN);
             signal(SIGTTOU, SIG_IGN);
 
-            if (tcsetpgrp(STDIN_FILENO, tmpProcess->pid) == -1)
-            {
-                perror("Error, process cannot be made foreground");
-                return -1;
-            }
+            tcsetpgrp(STDIN_FILENO, tmpProcess->pid);
+            // if (tcsetpgrp(STDIN_FILENO, tmpProcess->pid) == -1)
+            // {
+            //     perror("Error, process cannot be made foreground");
+            //     return -1;
+            // }
             if (kill(tmpProcess->pid, SIGCONT) == -1)
             {
                 perror("Error, SIGCONT signal cannot be sent to the process");

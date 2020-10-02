@@ -73,11 +73,16 @@ void ctrlZHandler()
     }
 }
 
+void ctrlDHandler()
+{
+    cleanup();
+}
+
 void init()
 {
     setHomeDir(pwd());
     signal(SIGINT, ctrlCHandler);
-    // signal(SIGQUIT, SIG_IGN);
+    // signal(SIGQUIT, ctrlDHandler);
     signal(SIGCHLD, childProcHandler);
     signal(SIGTSTP, ctrlZHandler);
     initialiseChildProcessList();

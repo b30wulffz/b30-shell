@@ -2,7 +2,18 @@
 
 void setEnv(char **parsedCommand, int parsedLength)
 {
-    if (parsedLength == 3)
+    if (parsedLength == 2)
+    {
+        if (setenv(parsedCommand[1], "", 1) != -1)
+        {
+            printf("%s=%s\n", parsedCommand[1], "");
+        }
+        else
+        {
+            printf("setenv: [Error] environment variable cannot be set.\n");
+        }
+    }
+    else if (parsedLength == 3)
     {
         if (setenv(parsedCommand[1], parsedCommand[2], 1) != -1)
         {

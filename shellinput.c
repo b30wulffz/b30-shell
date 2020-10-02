@@ -145,6 +145,10 @@ void parseIORedir(char *command, int stdinBkp2, int stdoutBkp2)
 
     for (int i = 0; i < parsedLength; i++)
     {
+        if (i == parsedLength - 1 && (strcmp(parsed[i], "&") == 0))
+        {
+            continue;
+        }
         if (strcmp(parsed[i], "<") == 0)
         {
             ipFlag = 1;
@@ -572,7 +576,10 @@ void shellInput(char *homeDir)
     size_t bufferLen = 1024;
     buffer = (char *)malloc(bufferLen * sizeof(char));
 
-    getline(&buffer, &bufferLen, stdin);
+    if (getline(&buffer, &bufferLen, stdin) == EOF)
+    {
+        cleanup();
+    }
 
     parseInput(buffer);
 
