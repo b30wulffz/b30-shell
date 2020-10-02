@@ -58,22 +58,45 @@ void saveCommand(char *command)
     }
 }
 
-void history()
+void history(char **parsedCommand, int parsedLength)
 {
-    char **historyList = getHistoryList();
-    int upper = getHistoryLength();
-    int lower = upper - HISTORYCOUNT;
-    if (lower < 0)
+    if (parsedLength == 1 || parsedLength == 2)
     {
-        lower = 0;
-    }
-    for (int i = lower; i < upper; i++)
-    {
-        char *cmd = historyList[i];
-        printf("%s", cmd);
-        if (cmd[strlen(cmd) - 1] != '\n')
+        int historyCount = HISTORYCOUNT;
+        int upper = getHistoryLength();
+        if (parsedLength == 2)
         {
-            printf("\n");
+            historyCount = atoi(parsedCommand[1]);
+            if (historyCount < 0)
+            {
+                printf("Error: Count of history cannot be negative\n");
+                return;
+            }
+            else if (historyCount > upper)
+            {
+                printf("> Count of history cannot be more than %d\n", upper);
+                printf("> Truncating count to %d\n", upper);
+                historyCount = upper;
+            }
         }
+        char **historyList = getHistoryList();
+        int lower = upper - historyCount;
+        if (lower < 0)
+        {
+            lower = 0;
+        }
+        for (int i = lower; i < upper; i++)
+        {
+            char *cmd = historyList[i];
+            printf("%s", cmd);
+            if (cmd[strlen(cmd) - 1] != '\n')
+            {
+                printf("\n");
+            }
+        }
+    }
+    else
+    {
+        printf("Unsufficient Arguments Supplied\n");
     }
 }

@@ -19,7 +19,7 @@ char *permissions(mode_t mode)
     return perm;
 }
 
-void printFlagL(struct dirent *file, struct stat fileStat)
+void printFlagL(char *filename, struct stat fileStat)
 {
     char *perm = permissions(fileStat.st_mode);
     char *userName = (getpwuid(fileStat.st_uid))->pw_name;
@@ -28,7 +28,7 @@ void printFlagL(struct dirent *file, struct stat fileStat)
     strftime(f_time, 14, "%h %d %H:%M", localtime(&fileStat.st_mtime));
 
     // printf("%ld %ld %16ld %d %16s \n", perm, fileStat.st_nlink, fileStat.st_size, fileStat.st_size, fileStat.st_atime, file->d_name);
-    printf("%10s %ld %s %s %6ld %s %s", perm, fileStat.st_nlink, userName, groupName, fileStat.st_size, f_time, file->d_name);
+    printf("%10s %ld %s %s %6ld %s %s", perm, fileStat.st_nlink, userName, groupName, fileStat.st_size, f_time, filename);
     if (perm[0] == 'd')
     {
         printf("/");
@@ -71,7 +71,7 @@ void printLS(char *name, int flag_a, int flag_l)
                 stat(buf, &fileStat);
                 if (flag_a == 1 && flag_l == 1)
                 {
-                    printFlagL(file, fileStat);
+                    printFlagL(file->d_name, fileStat);
                 }
                 else if (flag_a == 1)
                 {
@@ -81,7 +81,7 @@ void printLS(char *name, int flag_a, int flag_l)
                 {
                     if (file->d_name[0] != '.')
                     {
-                        printFlagL(file, fileStat);
+                        printFlagL(file->d_name, fileStat);
                     }
                 }
                 else
@@ -107,9 +107,34 @@ void printLS(char *name, int flag_a, int flag_l)
     else
     {
         // printf("%s not found\n", name);
-        char *buf = (char *)malloc(sizeof(char) * BUFFSIZE);
-        sprintf(buf, "ls: cannot access '%s'", name);
-        perror(buf);
+        if (access(name, F_OK) != -1)
+        {
+            // char *buf = (char *)malloc(sizeof(char) * BUFFSIZE);
+            stat(name, &fileStat);
+            if (flag_a == 1 && flag_l == 1)
+            {
+                printFlagL(name, fileStat);
+            }
+            else if (flag_a == 1)
+            {
+                printf("%s  ", name);
+            }
+            else if (flag_l == 1)
+            {
+                printFlagL(name, fileStat);
+            }
+            else
+            {
+                printf("%s  ", name);
+            }
+            printf("\n");
+        }
+        else
+        {
+            char *buf = (char *)malloc(sizeof(char) * BUFFSIZE);
+            sprintf(buf, "ls: cannot access '%s'", name);
+            perror(buf);
+        }
     }
 }
 

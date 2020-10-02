@@ -12,6 +12,7 @@
 #include "history.h"
 #include "envvar.h"
 #include "jobs.h"
+#include "fgbg.h"
 
 void executeCommand(char **parsed, int parsedLength, char *trimmedCommand)
 {
@@ -66,7 +67,7 @@ void executeCommand(char **parsed, int parsedLength, char *trimmedCommand)
         }
         else if (strcmp(command, "history") == 0)
         {
-            history();
+            history(parsed, parsedLength);
         }
         else if (strcmp(command, "setenv") == 0)
         {
@@ -91,6 +92,14 @@ void executeCommand(char **parsed, int parsedLength, char *trimmedCommand)
         else if (strcmp(command, "overkill") == 0)
         {
             overkill();
+        }
+        else if (strcmp(command, "fg") == 0)
+        {
+            fg(parsed, parsedLength);
+        }
+        else if (strcmp(command, "bg") == 0)
+        {
+            bg(parsed, parsedLength);
         }
         else if (strcmp(command, "exit") == 0 || strcmp(command, "quit") == 0)
         {

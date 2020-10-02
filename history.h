@@ -2,6 +2,6 @@
 #define __HISTORY_H
 
 void saveCommand(char *command);
-void history();
+void history(char **parsedCommand, int parsedLength);
 
 #endif
