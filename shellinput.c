@@ -145,7 +145,7 @@ void parseIORedir(char *command, int stdinBkp2, int stdoutBkp2)
 
     for (int i = 0; i < parsedLength; i++)
     {
-        if (i == parsedLength - 1 && (strcmp(parsed[i], "&") == 0))
+        if ((i == (parsedLength - 1)) && (strcmp(parsed[i], "&") == 0))
         {
             continue;
         }
